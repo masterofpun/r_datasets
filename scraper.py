@@ -1,24 +1,47 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
+import requests, time, csv, json, sqlite3
 
-# import scraperwiki
-# import lxml.html
-#
-# # Read in a page
-# html = scraperwiki.scrape("http://foo.com")
-#
-# # Find something on the page using css selectors
-# root = lxml.html.fromstring(html)
-# root.cssselect("div[align='left']")
-#
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-# scraperwiki.sql.select("* from data where 'name'='peter'")
+req = requests.Session()
 
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
+existing_db = 'http://pastebin.com/raw/51KAK8nf'
+reddit_url = 'https://www.reddit.com/r/datasets/new/.json?before=t3_'
+
+headers = {'User-Agent':'Python script gathering data for research, will stop if asked; contact at: reddit.com/u/hypd09', 'Accept-Encoding': 'gzip', 'Content-Encoding': 'gzip'}
+
+DB_FILE = 'data.sqlite'
+conn = sqlite3.connect(DB_FILE)
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS data (created_utc,author,domain,num_comments,score,title,id,is_self)")
+
+c.execute('SELECT id FROM data ORDER BY created_utc DESC')
+_id = c.fetchone()
+
+if _id is None:
+    file = req.get(existing_db)
+
+    csvreader = csv.reader(file.text.split('\n'),delimiter=',', quotechar='"')
+    for d in csvreader:
+        print(d)
+        c.execute('INSERT INTO data VALUES (?,?,?,?,?,?,?,?)',d)
+    conn.commit()
+    
+c.execute('SELECT id FROM data ORDER BY created_utc DESC')
+_id = c.fetchone()
+
+if _id is None:
+    print('Something up with the existing db')
+    quit()
+
+_id = _id[0]
+
+time.sleep(2) #just in case
+newData = json.loads(req.get(reddit_url+_id, headers=headers).text)['data']['children']
+
+for post in newData:
+    post = post['data']
+    print(json.dumps(post,indent=4,sort_keys=True))
+    postData = [post['created_utc'],post['author'],post['domain'],post['num_comments'],post['score'],post['title'],post['id'],post['is_self']]
+    print(postData)
+    c.execute('INSERT INTO data VALUES (?,?,?,?,?,?,?,?)',postData)
+    
+c.close()
+
