@@ -10,7 +10,7 @@ headers = {'User-Agent':'Python script gathering data for research, will stop if
 DB_FILE = 'data.sqlite'
 conn = sqlite3.connect(DB_FILE)
 c = conn.cursor()
-c.execute("CREATE TABLE IF NOT EXISTS data (created_utc,author,domain,num_comments,score,title,id,is_self,url,selftext)")
+c.execute("CREATE TABLE IF NOT EXISTS data (created_utc INTEGER,author TEXT,domain TEXT,num_comments INTEGER,score INTEGER,title TEXT,id TEXT UNIQUE,is_self TEXT,url TEXT,selftext TEXT)")
 
 c.execute('SELECT created_utc,id FROM data ORDER BY created_utc DESC')
 _id = c.fetchone()
