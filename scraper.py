@@ -12,7 +12,7 @@ conn = sqlite3.connect(DB_FILE)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS data (created_utc,author,domain,num_comments,score,title,id,is_self,url,selftext)")
 
-c.execute('SELECT id FROM data ORDER BY created_utc DESC')
+c.execute('SELECT created_utc,id FROM data ORDER BY created_utc DESC')
 _id = c.fetchone()
 
 if _id is None:
@@ -23,16 +23,16 @@ if _id is None:
         c.execute('INSERT INTO data VALUES (?,?,?,?,?,?,?,?,?,?)',d)
     print('added existing data')
     conn.commit()
-    
-c.execute('SELECT id FROM data ORDER BY created_utc DESC')
-_id = c.fetchone()
+        
+    c.execute('SELECT id FROM data ORDER BY created_utc DESC')
+    _id = c.fetchone()
 
 if _id is None:
     print('Something up with the existing db')
     quit()
 
-_id = _id[0]
 print(_id)
+_id = _id[1]
 
 time.sleep(2) #just in case
 newData = json.loads(req.get(reddit_url+_id, headers=headers).text)['data']['children']
