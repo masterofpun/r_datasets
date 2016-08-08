@@ -39,7 +39,7 @@ newData = json.loads(req.get(reddit_url+_id, headers=headers).text)['data']['chi
 
 for post in newData:
     post = post['data']
-    postData = [post['created_utc'],post['author'],post['domain'],post['num_comments'],post['score'],post['title'],post['id'],post['is_self'],post['url'],post['selftext']]
+    postData = [int(post['created_utc']),post['author'],post['domain'],post['num_comments'],post['score'],post['title'],post['id'],post['is_self'],post['url'],post['selftext']]
     print(postData)
     c.execute('INSERT INTO data VALUES (?,?,?,?,?,?,?,?,?,?)',postData)
     
