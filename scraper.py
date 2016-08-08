@@ -32,6 +32,7 @@ if _id is None:
     quit()
 
 _id = _id[0]
+print(_id)
 
 time.sleep(2) #just in case
 newData = json.loads(req.get(reddit_url+_id, headers=headers).text)['data']['children']
@@ -41,7 +42,7 @@ for post in newData:
     postData = [post['created_utc'],post['author'],post['domain'],post['num_comments'],post['score'],post['title'],post['id'],post['is_self'],post['url'],post['selftext']]
     print(postData)
     c.execute('INSERT INTO data VALUES (?,?,?,?,?,?,?,?,?,?)',postData)
-    conn.commit()
     
+conn.commit()
 c.close()
 
